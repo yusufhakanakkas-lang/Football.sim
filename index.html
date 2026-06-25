@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Football Superstar Simulator</title>
+    <style>
+        :root {
+            --bg-dark: #121824;
+            --panel-bg: #1e2638;
+            --border-color: #2e3b56;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-gold: #f59e0b;
+            --accent-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1200px;
+            background: #151d2a;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        /* Top Status Bar */
+        .top-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .status-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Main Grid Layout */
+        .main-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        /* Lists & Elements */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+
+        .btn {
+            background: #2a354d;
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .btn:hover {
+            background: #374665;
+            border-color: var(--text-muted);
+        }
+
+        .btn-action {
+            background: var(--accent-blue);
+            border-color: #2563eb;
+        }
+        .btn-action:hover { background: #2563eb; }
+
+        .btn-match {
+            background: var(--accent-green);
+            border-color: #059669;
+            font-size: 15px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        .btn-match:hover { background: #059669; }
+
+        /* Feed Box */
+        .log-box {
+            background: #111622;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            height: 140px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .social-post {
+            background: #1a2233;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            border-left: 3px solid var(--accent-blue);
+            line-height: 1.4;
+        }
+
+        /* Interactivity Overlay Windows */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .modal-title {
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        .modal-desc {
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .choice-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="top-bar">
+            <div class="status-item">
+                <span class="status-label">Bank Balance</span>
+                <span id="display-money" style="color: var(--accent-green);">$1,000</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">⚡ Energy</span>
+                <span id="display-energy">100/100</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">⭐ Rating (OVR)</span>
+                <span id="display-ovr" style="color: var(--accent-gold);">50</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Current Club</span>
+                <span id="display-club" style="color: #60a5fa;">Local Town FC</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Schedule</span>
+                <span id="display-week">Season 1, Week 1</span>
+            </div>
+        </div>
+
+        <div class="main-dashboard">
+            
+            <div class="panel">
+                <div class="panel-title">Player Card</div>
+                <div class="stat-row"><strong>Position:</strong> <span>Striker</span></div>
+                <div class="stat-row"><strong>👟 Shooting:</strong> <span id="stat-shooting">50</span></div>
+                <div class="stat-row"><strong>🎯 Passing:</strong> <span id="stat-passing">50</span></div>
+                <div class="stat-row"><strong>🧠 Technique:</strong> <span id="stat-technique">50</span></div>
+                <div class="stat-row"><strong>👔 Manager Trust:</strong> <span id="stat-trust">70%</span></div>
+                <div class="stat-row"><strong>👥 Team Chemistry:</strong> <span id="stat-chemistry">60%</span></div>
+                <div class="stat-row"><strong>🔥 Fan Popularity:</strong> <span id="stat-reputation">40%</span></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">The Training Ground</div>
+                <div class="log-box" id="routine-log">Welcome to your career. Train up your skills, rest up, and win your first fixture match!</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn" onclick="train('shooting')">⚽ Train Shoot (-20⚡)</button>
+                    <button class="btn" onclick="train('passing')">🎯 Train Pass (-20⚡)</button>
+                    <button class="btn" onclick="train('technique')">🪄 Train Tech (-20⚡)</button>
+                    <button class="btn" style="border-color: var(--accent-green);" onclick="rest()">💤 Rest & Recover</button>
+                </div>
+
+                <button class="btn btn-match" onclick="startMatchday()">🏆 ADVANCE TO MATCH DAY</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Life & Social Media</div>
+                <div class="social-post" id="social-feed">
+                    <strong>@FootyFanatic:</strong> Hearing rumors about a hot new academy prospect signing today! #FootballSim
+                </div>
+                
+                <button class="btn btn-action" onclick="checkTransfers()">💼 Browse Transfer Market</button>
+                <button class="btn" onclick="buyLifestyle('trainer')">🏋️ Hire Elite Coach ($1,500)</button>
+                <button class="btn" onclick="buyLifestyle('agent')">👔 Sign Super-Agent ($5,000)</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="overlay" id="event-overlay">
+        <div class="modal">
+            <h2 class="modal-title" id="modal-title">Match Event</h2>
+            <p class="modal-desc" id="modal-desc">Loading scenario context...</p>
+            <div class="choice-btn-group" id="modal-choices">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Logic State Management
+        let player = {
+            money: 1000,
+            energy: 100,
+            shooting: 50,
+            passing: 50,
+            technique: 50,
+            managerTrust: 70,
+            chemistry: 60,
+            reputation: 40,
+            club: "Local Town FC",
+            wage: 300,
+            week: 1,
+            season: 1,
+            hasTrainer: false,
+            hasAgent: false
+        };
+
+        const availableClubs = [
+            { name: "Local Town FC", reqOvr: 0, wage: 300 },
+            { name: "United City FC", reqOvr: 55, wage: 1500 },
+            { name: "Madrid Athletic", reqOvr: 70, wage: 8000 },
+            { name: "Galácticos Elite", reqOvr: 85, wage: 45000 }
+        ];
+
+        function getOVR() {
+            return Math.round((player.shooting + player.passing + player.technique) / 3);
+        }
+
+        function updateUI() {
+            document.getElementById('display-money').innerText = `$${player.money.toLocaleString()}`;
+            document.getElementById('display-energy').innerText = `${player.energy}/100`;
+            document.getElementById('display-ovr').innerText = getOVR();
+            document.getElementById('display-club').innerText = player.club;
+            document.getElementById('display-week').innerText = `Season ${player.season}, Wk ${player.week}`;
+            
+            document.getElementById('stat-shooting').innerText = player.shooting;
+            document.getElementById('stat-passing').innerText = player.passing;
+            document.getElementById('stat-technique').innerText = player.technique;
+            document.getElementById('stat-trust').innerText = `${player.managerTrust}%`;
+            document.getElementById('stat-chemistry').innerText = `${player.chemistry}%`;
+            document.getElementById('stat-reputation').innerText = `${player.reputation}%`;
+        }
+
+        function logEvent(message) {
+            const logBox = document.getElementById('routine-log');
+            logBox.innerHTML = message + "<br><br>" + logBox.innerHTML;
+        }
+
+        function setSocial(handle, post) {
+            document.getElementById('social-feed').innerHTML = `<strong>${handle}:</strong> ${post}`;
+        }
+
+        function train(stat) {
+            if (player.energy < 20) {
+                logEvent("❌ Too exhausted to train! Rest up first.");
+                return;
+            }
+            player.energy -= 20;
+            let gain = player.hasTrainer ? Math.floor(Math.random() * 3) + 3 : Math.floor(Math.random() * 3) + 1;
+            player[stat] += gain;
+            logEvent(`🏋️ You worked hard on the field. Your <strong>${stat}</strong> increased by +${gain}!`);
+            updateUI();
+        }
+
+        function rest() {
+            player.energy = Math.min(100, player.energy + 45);
+            logEvent("💤 You rested up, rehydrated, and completely recovered your energy.");
+            updateUI();
+        }
+
+        function buyLifestyle(item) {
+            if (item === 'trainer' && !player.hasTrainer) {
+                if (player.money >= 1500) { player.money -= 1500; player.hasTrainer = true; logEvent("✅ Hired Elite Personal Coach! Your training stat gains are boosted."); }
+                else logEvent("❌ Not enough money.");
+            } else if (item === 'agent' && !player.hasAgent) {
+                if (player.money >= 5000) { player.money -= 5000; player.hasAgent = true; logEvent("✅ Signed Super-Agent! Big clubs will negotiate with you at lower ratings."); }
+                else logEvent("❌ Not enough money.");
+            } else {
+                logEvent("You already own this!");
+            }
+            updateUI();
+        }
+
+        function checkTransfers() {
+            openOverlay();
+            document.getElementById('modal-title').innerText = "Transfer Market Windows";
+            let desc = "Browse potential contract offers based on your current skill level:<br><br>";
+            let ovr = getOVR();
+            let bonus = player.hasAgent ? 6 : 0;
+
+            let choicesHTML = "";
+            availableClubs.forEach(c => {
+                let allowed = (ovr + bonus) >= c.reqOvr;
+                desc += `• <strong>${c.name}</strong> - Req OVR: ${c.reqOvr} (Weekly Wage: $${c.wage})<br>`;
+                if (allowed && c.name !== player.club) {
+                    choicesHTML += `<button class="btn btn-action" onclick="signClub('${c.name}', ${c.wage})">Sign with ${c.name}</button>`;
+                }
+            });
+            choicesHTML += `<button class="btn" onclick="closeOverlay()">Close Market</button>`;
+            
+            document.getElementById('modal-desc').innerHTML = desc;
+            document.getElementById('modal-choices').innerHTML = choicesHTML;
+        }
+
+        function signClub(name, wage) {
+            player.club = name;
+            player.wage = wage;
+            logEvent(`💼 TRANSFER: You have officially signed with <strong>${name}</strong>! New wage is $${wage}/wk.`);
+            closeOverlay();
+            updateUI();
+        }
+
+        function openOverlay() { document.getElementById('event-overlay').style.display = 'flex'; }
+        function closeOverlay() { document.getElementById('event-overlay').style.display = 'none'; }
+
+        function startMatchday() {
+            if (player.energy < 30) {
+                logEvent("⚠️ You are too tired to play match day! Go rest first.");
+                return;
+            }
+            player.energy -= 30;
+            openOverlay();
+            
+            let refStrict = Math.random() > 0.5;
+            let refStyle = refStrict ? "🚨 Referee Style: Strict (Quick to spot diving/fouls)" : "🍃 Referee Style: Lenient (Lets physical play slide)";
+
+            document.getElementById('modal-title').innerText = `MATCHDAY EVENT`;
+            document.getElementById('modal-desc').innerHTML = `You have broken past the defensive backline into the penalty box! A defender is pulling your jersey.<br><br><strong>${refStyle}</strong>`;
+
+            let choicesHTML = `
+                <button class="btn" onclick="resolveMatchAction('curl', ${refStrict})">🎯 Curl it into the far corner (Requires Shooting & Tech)</button>
+                <button class="btn" onclick="resolveMatchAction('foul', ${refStrict})">💥 Play Aggressive: Muscle past him directly</button>
+                <button class="btn" style="color: var(--accent-gold);" onclick="resolveMatchAction('dive', ${refStrict})">🎭 Dive: Flop down looking for a sneaky penalty</button>
+            `;
+            document.getElementById('modal-choices').innerHTML = choicesHTML;
+        }
+
+        function resolveMatchAction(choice, refStrict) {
+            let title = "";
+            let desc = "";
+            let success = false;
+
+            if (choice === 'curl') {
+                success = (player.shooting + player.technique) / 2 > Math.random() * 100;
+                if (success) {
+                    title = "⚽ WORLD CLASS GOAL!";
+                    desc = "You masterfully whipped the ball around the goalkeeper's outstretched hands! Sensational strike.";
+                    player.reputation += 15; player.managerTrust += 10; player.money += player.wage;
+                    setSocial("@GoalZone", `What a stellar game winner from the wonderkid! Superb accuracy.`);
+                } else {
+                    title = "❌ Missed Shot";
+                    desc = "You missed the target. The ball flew directly into the advertising boards.";
+                    player.managerTrust -= 5;
+                    setSocial("@FanaticPF", "Should've passed the ball instead of shooting from there.");
+                }
+            } 
+            else if (choice === 'foul') {
+                success = player.shooting > Math.random() * 90;
+                if (success) {
+                    title = "⚡ FORCEFUL GOAL!";
+                    desc = "You aggressively held your ground, shrugged off the defender, and blasted it near-post!";
+                    player.chemistry -= 5; player.managerTrust += 8; player.money += player.wage;
+                } else {
+                    title = "🔕 Foul Blown";
+                    desc = "The referee saw your shove and blew the whistle for an offensive foul.";
+                    player.managerTrust -= 10;
+                }
+            } 
+            else if (choice === 'dive') {
+                if (refStrict) {
+                    title = "🟨 YELLOW CARD! Diver!";
+                    desc = "The strict ref wasn't fooled for a second. He marched over and booked you for simulation.";
+                    player.managerTrust -= 25; player.reputation -= 20;
+                    setSocial("@AntiCheatFC", "Embarrassing diving. Keep cheating out of football.");
+                } else {
+                    title = "🎯 PENALTY! The Ref Bought It!";
+                    desc = "You dropped down dramatically, holding your ankle. The lenient ref blew for a penalty! You coolly slot it home.";
+                    player.money += (player.wage + 500); player.reputation += 5;
+                    setSocial("@LuckyClub", "Dirty dive but hey, a penalty is a penalty! We take those points.");
+                }
+            }
+
+            player.week++;
+            if(player.week > 4) {
+                player.week = 1;
+                player.season++;
+                title += " [SEASON OVER]";
+                desc += "<br><br>The league season has come to an end. Check the market for new big club offers!";
+            }
+
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerHTML = desc;
+            document.getElementById('modal-choices').innerHTML = `<button class="btn btn-action" onclick="triggerInterview('${choice}')">Go to Post-Match Interview</button>`;
+            updateUI();
+        }
+
+        function triggerInterview(pastChoice) {
+            document.getElementById('modal-title').innerText = "🎤 Press Conference";
+            let desc = "";
+            let choicesHTML = "";
+
+            if (pastChoice === 'dive') {
+                desc = "Reporter: 'Replays suggest you dropped very easily without actual contact. Did you cheat to get that penalty?'";
+                choicesHTML = `
+                    <button class="btn" onclick="resolveInterview(10, -15, 'Defiant')">"A win is a win. Good players are smart players."</button>
+                    <button class="btn" onclick="resolveInterview(-5, 10, 'Humble')">"I felt contact and lost my balance. It wasn't intentional."</button>
+                `;
+            } else {
+                desc = "Reporter: 'You made a massive impact on the match today. What's the secret to your performance?'";
+                choicesHTML = `
+                    <button class="btn" onclick="resolveInterview(15, -5, 'Arrogant')">"Simple. I'm just the best player in this roster."</button>
+                    <button class="btn" onclick="resolveInterview(-5, 20, 'Team Player')">"It's purely teamwork. My teammates set me up perfectly."</button>
+                `;
+            }
+
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-choices').innerHTML = choicesHTML;
+        }
+
+        function resolveInterview(trustMod, chemMod, type) {
+            player.managerTrust = Math.max(0, Math.min(100, player.managerTrust + trustMod));
+            player.chemistry = Math.max(0, Math.min(100, player.chemistry + chemMod));
+            
+            logEvent(`🎤 Interview: You gave a ${type} answer to the reporters.`);
+            closeOverlay();
+            updateUI();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
